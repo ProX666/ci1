@@ -6,25 +6,31 @@ class News_model extends CI_Model {
         $this->load->database();
     }
 
-    public function get_news($slug = FALSE) {
+    /**
+     *
+     * @param type $call_array
+     * @return type
+     */
+    public function get_news($call_array = FALSE) {
 
-        if (FALSE === $slug) {
+        if (FALSE === $call_array) {
             $query = $this->db->get('news');
             return $query->result_array();
         }
 
-        $query = $this->db->get_where('news', array('slug' => $slug));
+        $query = $this->db->get_where('news', $call_array);
         return $query->row_array();
     }
 
-    public function set_news() {
+
+
+    /**
+     * DRY method for new or edit news items
+     *
+     * @return type
+     */
+    public function set_news($id = null) {
         $this->load->helper('url');
-
-
-        $slug_old = $this->input->post('slug_old');
-        if (isset($slug_old)) {
-            $edit = true;
-        }
 
         $slug = url_title($this->input->post('title'), 'dash', TRUE);
 
@@ -34,16 +40,18 @@ class News_model extends CI_Model {
             'text' => $this->input->post('text')
         );
 
-        if ($edit) {
-            $this->db->where('slug', $slug_old);
+        if ($id) {
+            // update
+            $this->db->where('id', $id);
             return $this->db->update('news', $data);
         } else {
+            // new
             return $this->db->insert('news', $data);
         }
     }
 
-    public function delete_news($slug) {
-        $this->db->delete('news', array('slug' => $slug));
+    public function delete_news($id) {
+        $this->db->delete('news', array('id' => $id));
     }
 
 }

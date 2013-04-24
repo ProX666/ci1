@@ -17,7 +17,7 @@ class News extends CI_Controller {
     }
 
     public function view($slug) {
-        $data['news_item'] = $this->news_model->get_news($slug);
+        $data['news_item'] = $this->news_model->get_news(array('slug' => $slug));
 
         if (empty($data['news_item'])) {
             show_404();
@@ -30,30 +30,42 @@ class News extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
-    public function create($slug = null) {
+    public function create() {
         $this->load->helper('form');
         $this->load->library('form_validation');
 
         $this->form_validation->set_rules('title', 'Title', 'required');
         $this->form_validation->set_rules('text', 'text', 'required');
 
-        if (isset($slug)) {
-            $data['title'] = 'Edit a news item';
-        } else {
-            $data['title'] = 'Create a news item';
-        }
+        $data['title'] = 'Create a news item';
 
         if ($this->form_validation->run() === FALSE) {
             $this->load->view('templates/header', $data);
-            if (isset($slug)) {
-                $data['news_item'] = $this->news_model->get_news($slug);
-                $this->load->view('news/create', $data);
-            } else {
-                $this->load->view('news/create');
-            }
+            $this->load->view('news/create');
             $this->load->view('templates/footer');
         } else {
             $this->news_model->set_news();
+            $this->load->view('news/success');
+        }
+    }
+
+    public function edit($id = null) {
+        $this->load->helper('form');
+        $this->load->library('form_validation');
+
+        $this->form_validation->set_rules('title', 'Title', 'required');
+        $this->form_validation->set_rules('text', 'text', 'required');
+
+        $data['title'] = 'Edit a news item';
+
+        if ($this->form_validation->run() === FALSE) {
+            $this->load->view('templates/header', $data);
+            $data['news_item'] = $this->news_model->get_news(array('id' => $id));
+
+            $this->load->view('news/edit', $data);
+            $this->load->view('templates/footer');
+        } else {
+            $this->news_model->set_news($id);
             $this->load->view('news/success');
         }
     }
